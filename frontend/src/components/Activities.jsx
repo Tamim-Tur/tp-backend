@@ -7,6 +7,7 @@ function Activities() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     type: 'running',
     duration: '',
@@ -56,7 +57,13 @@ function Activities() {
         notes: formData.notes || undefined,
       };
 
-      await api.createActivity(activityData);
+      if (editingId) {
+        await api.updateActivity(editingId, activityData);
+        setEditingId(null);
+      } else {
+        await api.createActivity(activityData);
+      }
+      
       setShowForm(false);
       setFormData({
         type: 'running',
@@ -68,10 +75,36 @@ function Activities() {
       loadActivities();
       loadStats();
     } catch (err) {
-      setError(err.message || 'Erreur lors de la création');
+      setError(err.message || (editingId ? 'Erreur lors de la modification' : 'Erreur lors de la création'));
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = (activity) => {
+    setEditingId(activity.id);
+    setFormData({
+      type: activity.type,
+      duration: activity.duration.toString(),
+      calories: activity.calories ? activity.calories.toString() : '',
+      distance: activity.distance ? activity.distance.toString() : '',
+      notes: activity.notes || '',
+    });
+    setShowForm(true);
+    setError('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setShowForm(false);
+    setFormData({
+      type: 'running',
+      duration: '',
+      calories: '',
+      distance: '',
+      notes: '',
+    });
+    setError('');
   };
 
   const handleDelete = async (id) => {
@@ -92,7 +125,13 @@ function Activities() {
     <div className="activities-container">
       <div className="header-section">
         <h2>Mes Activités</h2>
-        <button onClick={() => setShowForm(!showForm)}>
+        <button onClick={() => {
+          if (showForm) {
+            handleCancelEdit();
+          } else {
+            setShowForm(true);
+          }
+        }}>
           {showForm ? 'Annuler' : '+ Nouvelle activité'}
         </button>
       </div>
@@ -123,7 +162,7 @@ function Activities() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="activity-form">
-          <h3>Nouvelle activité</h3>
+          <h3>{editingId ? 'Modifier l\'activité' : 'Nouvelle activité'}</h3>
           <div className="form-group">
             <label>Type:</label>
             <select
@@ -176,9 +215,14 @@ function Activities() {
             />
           </div>
           {error && <div className="error">{error}</div>}
-          <button type="submit" disabled={loading}>
-            {loading ? 'Création...' : 'Créer'}
-          </button>
+          <div className="form-actions">
+            <button type="submit" disabled={loading}>
+              {loading ? (editingId ? 'Modification...' : 'Création...') : (editingId ? 'Modifier' : 'Créer')}
+            </button>
+            <button type="button" onClick={handleCancelEdit} disabled={loading}>
+              Annuler
+            </button>
+          </div>
         </form>
       )}
 
@@ -195,12 +239,6 @@ function Activities() {
               <div key={activity.id} className="activity-card">
                 <div className="activity-header">
                   <h4>{activity.type}</h4>
-                  <button
-                    onClick={() => handleDelete(activity.id)}
-                    className="delete-btn"
-                  >
-                    Supprimer
-                  </button>
                 </div>
                 <div className="activity-details">
                   <p><strong>Durée:</strong> {activity.duration} minutes</p>
@@ -216,6 +254,20 @@ function Activities() {
                   <p className="activity-date">
                     {new Date(activity.date || activity.created_at).toLocaleDateString('fr-FR')}
                   </p>
+                </div>
+                <div className="activity-actions">
+                  <button
+                    onClick={() => handleEdit(activity)}
+                    className="btn btn-secondary"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    onClick={() => handleDelete(activity.id)}
+                    className="btn btn-danger"
+                  >
+                    Supprimer
+                  </button>
                 </div>
               </div>
             ))

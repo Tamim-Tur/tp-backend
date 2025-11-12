@@ -3,6 +3,7 @@ const {
   createActivity, 
   getUserActivities, 
   getActivity, 
+  updateActivity,
   deleteActivity, 
   getStats 
 } = require('../controllers/activityController');
@@ -17,6 +18,7 @@ router.post('/', activityValidation, createActivity);
 router.get('/', getUserActivities);
 router.get('/stats', getStats);
 router.get('/:id', getActivity);
+router.put('/:id', activityValidation, updateActivity);
 router.delete('/:id', deleteActivity);
 
 module.exports = router;

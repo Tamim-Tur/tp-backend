@@ -40,6 +40,7 @@ function App() {
   };
 
   const handleLogout = () => {
+    api.setToken(null);
     setUser(null);
     setCurrentView('login');
   };
@@ -52,42 +53,52 @@ function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <h1>🏃 Sport App</h1>
+          <div className="logo-section">
+            <h1>🏃 Sport App</h1>
+          </div>
           {user && (
-            <nav className="nav-menu">
-              <button
-                onClick={() => setCurrentView('dashboard')}
-                className={currentView === 'dashboard' ? 'active' : ''}
-              >
-                📊 Tableau de bord
-              </button>
-              <button
-                onClick={() => setCurrentView('activities')}
-                className={currentView === 'activities' ? 'active' : ''}
-              >
-                🏋️ Activités
-              </button>
-              <button
-                onClick={() => setCurrentView('goals')}
-                className={currentView === 'goals' ? 'active' : ''}
-              >
-                🎯 Objectifs
-              </button>
-              <button
-                onClick={() => setCurrentView('profile')}
-                className={currentView === 'profile' ? 'active' : ''}
-              >
-                👤 Profil
-              </button>
-              {user.role === 'admin' && (
+            <>
+              <nav className="nav-menu">
                 <button
-                  onClick={() => setCurrentView('users')}
-                  className={currentView === 'users' ? 'active' : ''}
+                  onClick={() => setCurrentView('dashboard')}
+                  className={currentView === 'dashboard' ? 'active' : ''}
                 >
-                  👥 Utilisateurs
+                  📊 Tableau de bord
                 </button>
-              )}
-            </nav>
+                <button
+                  onClick={() => setCurrentView('activities')}
+                  className={currentView === 'activities' ? 'active' : ''}
+                >
+                  🏋️ Activités
+                </button>
+                <button
+                  onClick={() => setCurrentView('goals')}
+                  className={currentView === 'goals' ? 'active' : ''}
+                >
+                  🎯 Objectifs
+                </button>
+                <button
+                  onClick={() => setCurrentView('profile')}
+                  className={currentView === 'profile' ? 'active' : ''}
+                >
+                  👤 Profil
+                </button>
+                {user.role === 'admin' && (
+                  <button
+                    onClick={() => setCurrentView('users')}
+                    className={currentView === 'users' ? 'active' : ''}
+                  >
+                    👥 Utilisateurs
+                  </button>
+                )}
+              </nav>
+              <div className="user-actions">
+                <span className="user-name">{user.email}</span>
+                <button onClick={handleLogout} className="btn-logout">
+                  Déconnexion
+                </button>
+              </div>
+            </>
           )}
         </div>
       </header>
@@ -127,6 +138,31 @@ function App() {
           </>
         )}
       </main>
+
+      {user && (
+        <footer className="app-footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>Sport App</h3>
+              <p>Suivez vos activités sportives et atteignez vos objectifs</p>
+            </div>
+            <div className="footer-section">
+              <h4>Navigation</h4>
+              <ul>
+                <li><button onClick={() => setCurrentView('dashboard')}>Tableau de bord</button></li>
+                <li><button onClick={() => setCurrentView('activities')}>Activités</button></li>
+                <li><button onClick={() => setCurrentView('goals')}>Objectifs</button></li>
+                <li><button onClick={() => setCurrentView('profile')}>Profil</button></li>
+              </ul>
+            </div>
+            <div className="footer-section">
+              <h4>Informations</h4>
+              <p>© 2024 Sport App. Tous droits réservés.</p>
+              <p>Version 1.0.0</p>
+            </div>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }

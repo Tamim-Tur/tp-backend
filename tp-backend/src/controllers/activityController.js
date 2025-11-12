@@ -9,6 +9,21 @@ exports.createActivity = async (req, res, next) => {
   }
 };
 
+exports.updateActivity = async (req, res, next) => {
+  try {
+    const activity = await ActivityService.updateActivity(req.params.id, req.body, req.user.id);
+    res.json(activity);
+  } catch (error) {
+    if (error && error.message === 'Activité non trouvée') {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error && error.message === 'Accès non autorisé') {
+      return res.status(403).json({ message: error.message });
+    }
+    next(error);
+  }
+};
+
 exports.getUserActivities = async (req, res, next) => {
   try {
     const activities = await ActivityService.getUserActivities(req.user.id);

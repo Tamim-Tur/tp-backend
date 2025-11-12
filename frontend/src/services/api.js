@@ -134,6 +134,13 @@ class ApiService {
     return this.request(`/activities/${id}`);
   }
 
+  async updateActivity(id, activityData) {
+    return this.request(`/activities/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(activityData),
+    });
+  }
+
   async deleteActivity(id) {
     return this.request(`/activities/${id}`, {
       method: 'DELETE',

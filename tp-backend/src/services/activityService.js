@@ -131,6 +131,28 @@ class ActivityService {
     return activity;
   }
 
+  static async updateActivity(id, activityData, userId) {
+    const activity = await Activity.findById(id);
+    if (!activity) {
+      throw new Error('Activité non trouvée');
+    }
+    if (activity.user_id !== userId) {
+      throw new Error('Accès non autorisé');
+    }
+    
+    const updatedActivity = await Activity.update(id, userId, activityData);
+    
+    // Mettre à jour automatiquement les objectifs actifs après modification
+    try {
+      await this.updateActiveGoals(userId);
+    } catch (error) {
+      // Ne pas faire échouer la mise à jour d'activité si la mise à jour des objectifs échoue
+      console.error('Erreur lors de la mise à jour automatique des objectifs:', error);
+    }
+    
+    return updatedActivity;
+  }
+
   static async deleteActivity(id, userId) {
     const activity = await Activity.findById(id);
     if (!activity) {

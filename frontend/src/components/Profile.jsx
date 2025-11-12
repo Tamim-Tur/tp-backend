@@ -79,10 +79,16 @@ function Profile({ onLogout }) {
       
       {!editMode ? (
         <div className="profile-info">
-          <p><strong>Email:</strong> {profile.email}</p>
-          <p><strong>Rôle:</strong> {profile.role}</p>
+          <div className="profile-info-item">
+            <p><strong>Email:</strong> {profile.email}</p>
+          </div>
+          <div className="profile-info-item">
+            <p><strong>Rôle:</strong> {profile.role}</p>
+          </div>
           {profile.created_at && (
-            <p><strong>Membre depuis:</strong> {new Date(profile.created_at).toLocaleDateString('fr-FR')}</p>
+            <div className="profile-info-item">
+              <p><strong>Membre depuis:</strong> {new Date(profile.created_at).toLocaleDateString('fr-FR')}</p>
+            </div>
           )}
           <div className="profile-actions">
             <button onClick={() => setEditMode(true)}>Modifier le profil</button>

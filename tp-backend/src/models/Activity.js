@@ -20,6 +20,18 @@ class Activity {
     const result = await pgPool.query(query, [id]);
     return result.rows[0];
   }
+  static async update(id, userId, { type, duration, calories, distance, notes }) {
+    const query = `
+      UPDATE activities 
+      SET type = $3, duration = $4, calories = $5, distance = $6, notes = $7, updated_at = NOW()
+      WHERE id = $1 AND user_id = $2
+      RETURNING *
+    `;
+    const values = [id, userId, type, duration, calories, distance, notes];
+    const result = await pgPool.query(query, values);
+    return result.rows[0];
+  }
+  
   static async delete(id, userId) {
     const query = 'DELETE FROM activities WHERE id = $1 AND user_id = $2';
     await pgPool.query(query, [id, userId]);
