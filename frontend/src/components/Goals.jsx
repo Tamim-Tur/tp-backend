@@ -96,7 +96,6 @@ function Goals() {
       const errorMessage = err.message || 'Erreur lors de la mise à jour de la progression';
       if (errorMessage.includes('non trouvé') || errorMessage.includes('404')) {
         setError('Cet objectif n\'existe plus. Veuillez rafraîchir la page.');
-        // Recharger les objectifs pour mettre à jour la liste
         setTimeout(() => loadGoals(), 1000);
       } else {
         setError(errorMessage);

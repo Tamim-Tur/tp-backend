@@ -15,7 +15,6 @@ function App() {
   const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est déjà connecté
     if (api.token) {
       checkAuth();
     }

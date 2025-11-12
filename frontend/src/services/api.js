@@ -31,7 +31,6 @@ class ApiService {
     try {
       const response = await fetch(url, config);
       
-      // Gérer les erreurs 429 (Too Many Requests)
       if (response.status === 429) {
         const retryAfter = response.headers.get('Retry-After') || '15';
         throw new Error(`Trop de requêtes. Veuillez réessayer dans ${retryAfter} minutes.`);
@@ -41,7 +40,6 @@ class ApiService {
       try {
         data = await response.json();
       } catch (jsonError) {
-        // Si la réponse n'est pas du JSON valide
         if (!response.ok) {
           throw new Error(`Erreur serveur (${response.status})`);
         }
@@ -49,10 +47,8 @@ class ApiService {
       }
 
       if (!response.ok) {
-        // Si erreur 401, le token est probablement expiré
         if (response.status === 401) {
           this.setToken(null);
-          // Rediriger vers la page de login si on est dans le navigateur
           if (typeof window !== 'undefined') {
             window.location.reload();
           }
@@ -66,7 +62,6 @@ class ApiService {
     }
   }
 
-  // Auth endpoints
   async register(email, password) {
     return this.request('/auth/register', {
       method: 'POST',
@@ -96,7 +91,6 @@ class ApiService {
     return data;
   }
 
-  // User endpoints
   async getProfile() {
     return this.request('/users/profile');
   }
@@ -118,7 +112,6 @@ class ApiService {
     });
   }
 
-  // Activity endpoints
   async createActivity(activityData) {
     return this.request('/activities', {
       method: 'POST',
@@ -151,7 +144,6 @@ class ApiService {
     return this.request(`/activities/stats?period=${period}`);
   }
 
-  // Goals endpoints
   async createGoal(goalData) {
     return this.request('/goals', {
       method: 'POST',

@@ -5,45 +5,37 @@
 }
 
 :root {
-  /* Couleurs simples et épurées */
   --primary-color: #FF6B35;
   --primary-dark: #E85D2B;
   --success-color: #22C55E;
   --danger-color: #EF4444;
   
-  /* Couleurs de fond */
   --bg-primary: #ffffff;
   --bg-secondary: #f5f5f5;
   --bg-light: #f9f9f9;
   
-  /* Couleurs de texte */
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
   --text-tertiary: #9ca3af;
   --text-white: #ffffff;
   
-  /* Bordures */
   --border-color: #e5e7eb;
   --border-dark: #d1d5db;
   
-  /* Ombres subtiles */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.12);
   
-  /* Espacements */
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
   --spacing-xl: 3rem;
   
-  /* Rayons */
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   
-  /* Transitions */
   --transition-base: 150ms ease-in-out;
 }
 
@@ -68,7 +60,6 @@ body {
   background: var(--bg-secondary);
 }
 
-/* ===== HEADER ===== */
 .app-header {
   background: var(--bg-primary);
   border-bottom: 2px solid var(--primary-color);
@@ -169,7 +160,6 @@ body {
   transform: translateY(-1px);
 }
 
-/* ===== MAIN ===== */
 .app-main {
   flex: 1;
   max-width: 1400px;
@@ -178,7 +168,6 @@ body {
   padding: var(--spacing-lg);
 }
 
-/* ===== AUTH ===== */
 .auth-section {
   max-width: 480px;
   margin: var(--spacing-xl) auto;
@@ -307,7 +296,6 @@ button:disabled {
   font-size: 0.95rem;
 }
 
-/* ===== DASHBOARD ===== */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
@@ -478,7 +466,6 @@ button:disabled {
   color: var(--text-secondary);
 }
 
-/* ===== GOALS ===== */
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -760,7 +747,6 @@ button:disabled {
   gap: var(--spacing-md);
 }
 
-/* ===== ACTIVITIES PREVIEW (Dashboard) ===== */
 .activities-preview {
   display: flex;
   flex-direction: column;
@@ -819,7 +805,6 @@ button:disabled {
   margin-top: var(--spacing-xs);
 }
 
-/* ===== ACTIVITIES ===== */
 .activities-container {
   background: transparent;
   padding: 0;
@@ -858,7 +843,6 @@ button:disabled {
   margin-bottom: var(--spacing-sm);
 }
 
-/* S'assurer que les stat-cards dans stats-section ont le même style */
 .stats-section .stat-card {
   background: #ffffff;
   padding: var(--spacing-lg);
@@ -1014,7 +998,6 @@ button:disabled {
   font-weight: 700;
 }
 
-/* ===== PROFILE ===== */
 .profile-container {
   background: transparent;
   padding: 0;
@@ -1258,7 +1241,6 @@ button:disabled {
   font-weight: 700;
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 1600px) {
   .stats-grid {
     gap: var(--spacing-xs);
@@ -1394,7 +1376,6 @@ button:disabled {
   }
 }
 
-/* ===== FOOTER ===== */
 .app-footer {
   background: var(--bg-primary);
   border-top: 2px solid var(--primary-color);
