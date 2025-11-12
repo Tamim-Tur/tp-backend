@@ -1,21 +1,14 @@
--- ============================================
--- REQUÊTES SQL POUR VOIR LES DONNÉES POSTGRESQL
--- ============================================
 
--- 1. VOIR TOUS LES UTILISATEURS
 SELECT id, email, role, created_at 
 FROM users 
 ORDER BY created_at DESC;
 
--- 2. COMPTER LE NOMBRE D'UTILISATEURS
 SELECT COUNT(*) as total_utilisateurs FROM users;
 
--- 3. VOIR LES UTILISATEURS PAR RÔLE
 SELECT role, COUNT(*) as nombre 
 FROM users 
 GROUP BY role;
 
--- 4. VOIR TOUTES LES ACTIVITÉS
 SELECT 
     a.id,
     u.email as utilisateur,
@@ -29,7 +22,6 @@ FROM activities a
 JOIN users u ON a.user_id = u.id
 ORDER BY a.date DESC;
 
--- 5. VOIR LES ACTIVITÉS D'UN UTILISATEUR SPÉCIFIQUE (remplacer 1 par l'ID)
 SELECT 
     type,
     duration,
@@ -41,7 +33,6 @@ FROM activities
 WHERE user_id = 1
 ORDER BY date DESC;
 
--- 6. STATISTIQUES PAR UTILISATEUR
 SELECT 
     u.id,
     u.email,
@@ -54,7 +45,6 @@ LEFT JOIN activities a ON u.id = a.user_id
 GROUP BY u.id, u.email
 ORDER BY nombre_activites DESC;
 
--- 7. ACTIVITÉS PAR TYPE
 SELECT 
     type,
     COUNT(*) as nombre,
@@ -65,7 +55,6 @@ FROM activities
 GROUP BY type
 ORDER BY nombre DESC;
 
--- 8. VOIR TOUS LES OBJECTIFS
 SELECT 
     g.id,
     u.email as utilisateur,
@@ -81,14 +70,12 @@ FROM goals g
 JOIN users u ON g.user_id = u.id
 ORDER BY g.created_at DESC;
 
--- 9. OBJECTIFS PAR STATUT
 SELECT 
     status,
     COUNT(*) as nombre
 FROM goals
 GROUP BY status;
 
--- 10. OBJECTIFS ACTIFS AVEC PROGRESSION
 SELECT 
     u.email,
     g.title,
@@ -102,7 +89,6 @@ JOIN users u ON g.user_id = u.id
 WHERE g.status = 'active'
 ORDER BY pourcentage_complete DESC;
 
--- 11. VOIR TOUS LES DÉFIS
 SELECT 
     c.id,
     u.email as utilisateur,
@@ -117,7 +103,6 @@ FROM challenges c
 JOIN users u ON c.user_id = u.id
 ORDER BY c.created_at DESC;
 
--- 12. ACTIVITÉS RÉCENTES (7 derniers jours)
 SELECT 
     u.email,
     a.type,
@@ -130,7 +115,6 @@ JOIN users u ON a.user_id = u.id
 WHERE a.date >= NOW() - INTERVAL '7 days'
 ORDER BY a.date DESC;
 
--- 13. ACTIVITÉS PAR MOIS
 SELECT 
     DATE_TRUNC('month', date) as mois,
     COUNT(*) as nombre_activites,
@@ -140,7 +124,6 @@ FROM activities
 GROUP BY DATE_TRUNC('month', date)
 ORDER BY mois DESC;
 
--- 14. TOP 10 UTILISATEURS PAR CALORIES BRÛLÉES
 SELECT 
     u.email,
     COUNT(a.id) as nombre_activites,
@@ -151,7 +134,6 @@ GROUP BY u.id, u.email
 ORDER BY calories_totales DESC
 LIMIT 10;
 
--- 15. ACTIVITÉS D'AUJOURD'HUI
 SELECT 
     u.email,
     a.type,
@@ -163,7 +145,6 @@ JOIN users u ON a.user_id = u.id
 WHERE DATE(a.date) = CURRENT_DATE
 ORDER BY a.date DESC;
 
--- 16. STATISTIQUES GLOBALES
 SELECT 
     (SELECT COUNT(*) FROM users) as total_utilisateurs,
     (SELECT COUNT(*) FROM activities) as total_activites,
@@ -173,7 +154,6 @@ SELECT
     (SELECT SUM(duration) FROM activities) as duree_totale_minutes,
     (SELECT SUM(distance) FROM activities) as distance_totale_km;
 
--- 17. UTILISATEURS SANS ACTIVITÉS
 SELECT 
     u.id,
     u.email,
@@ -182,7 +162,6 @@ FROM users u
 LEFT JOIN activities a ON u.id = a.user_id
 WHERE a.id IS NULL;
 
--- 18. ACTIVITÉS PAR JOUR DE LA SEMAINE
 SELECT 
     TO_CHAR(date, 'Day') as jour_semaine,
     COUNT(*) as nombre_activites,
@@ -191,7 +170,6 @@ FROM activities
 GROUP BY TO_CHAR(date, 'Day'), EXTRACT(DOW FROM date)
 ORDER BY EXTRACT(DOW FROM date);
 
--- 19. DÉTAILS COMPLETS D'UNE ACTIVITÉ (remplacer 1 par l'ID)
 SELECT 
     a.*,
     u.email as utilisateur_email
@@ -199,7 +177,6 @@ FROM activities a
 JOIN users u ON a.user_id = u.id
 WHERE a.id = 1;
 
--- 20. VUE DES STATISTIQUES UTILISATEUR (utilise la vue créée)
 SELECT * FROM user_stats_view
 ORDER BY total_calories DESC;
 

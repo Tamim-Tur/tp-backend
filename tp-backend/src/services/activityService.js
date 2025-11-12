@@ -12,13 +12,11 @@ class ActivityService {
     
     console.log(`[createActivity] Activité créée avec succès (id: ${activity.id})`);
     
-    // Mettre à jour automatiquement les objectifs actifs
     try {
       console.log(`[createActivity] Déclenchement de la mise à jour automatique des objectifs...`);
       await this.updateActiveGoals(userId);
       console.log(`[createActivity] Mise à jour des objectifs terminée`);
     } catch (error) {
-      // Ne pas faire échouer la création d'activité si la mise à jour des objectifs échoue
       console.error('[createActivity] Erreur lors de la mise à jour automatique des objectifs:', error);
       console.error('[createActivity] Stack:', error.stack);
     }
@@ -26,40 +24,31 @@ class ActivityService {
     return activity;
   }
   
-  // Méthode pour mettre à jour automatiquement tous les objectifs actifs d'un utilisateur
   static async updateActiveGoals(userId) {
     try {
-      // Récupérer tous les objectifs actifs de l'utilisateur
       const activeGoals = await Goal.findByUserId(userId, 'active');
       
       if (activeGoals.length === 0) {
         return;
       }
       
-      // Récupérer toutes les activités de l'utilisateur
       const activities = await Activity.findByUserId(userId);
       
-      // Mettre à jour chaque objectif actif
       for (const goal of activeGoals) {
         try {
           const startDate = new Date(goal.start_date);
           const endDate = new Date(goal.end_date);
-          // Ajouter un jour à la fin pour inclure toute la journée de fin
           endDate.setHours(23, 59, 59, 999);
           
           console.log(`[updateActiveGoals] Traitement objectif ${goal.id} (${goal.title}) - Période: ${startDate.toISOString().split('T')[0]} à ${endDate.toISOString().split('T')[0]}`);
           
-          // Normaliser les dates pour la comparaison (sans l'heure)
           const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
           const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
           
-          // Filtrer les activités dans la période de l'objectif
           const relevantActivities = activities.filter(activity => {
             if (!activity) return false;
             
-            // Filtrer par date
             const activityDate = new Date(activity.date || activity.created_at);
-            // Comparer seulement les dates (sans l'heure)
             const activityDateOnly = new Date(activityDate.getFullYear(), activityDate.getMonth(), activityDate.getDate());
             
             const isInRange = activityDateOnly >= startDateOnly && activityDateOnly <= endDateOnly;
@@ -74,7 +63,6 @@ class ActivityService {
           
           let currentValue = 0;
           
-          // Calculer la valeur actuelle selon le type d'objectif
           switch (goal.type) {
             case 'duration':
               currentValue = relevantActivities.reduce((sum, act) => {
@@ -100,7 +88,6 @@ class ActivityService {
           
           console.log(`[updateActiveGoals] Objectif ${goal.id}: valeur calculée = ${currentValue}, cible = ${goal.target_value}`);
           
-          // Mettre à jour l'objectif (le statut sera automatiquement mis à 'completed' si current_value >= target_value)
           const updatedGoal = await Goal.updateProgress(goal.id, userId, currentValue);
           
           if (updatedGoal && updatedGoal.status === 'completed') {
@@ -142,11 +129,9 @@ class ActivityService {
     
     const updatedActivity = await Activity.update(id, userId, activityData);
     
-    // Mettre à jour automatiquement les objectifs actifs après modification
     try {
       await this.updateActiveGoals(userId);
     } catch (error) {
-      // Ne pas faire échouer la mise à jour d'activité si la mise à jour des objectifs échoue
       console.error('Erreur lors de la mise à jour automatique des objectifs:', error);
     }
     
@@ -163,11 +148,9 @@ class ActivityService {
     }
     await Activity.delete(id, userId);
     
-    // Mettre à jour automatiquement les objectifs actifs après suppression
     try {
       await this.updateActiveGoals(userId);
     } catch (error) {
-      // Ne pas faire échouer la suppression d'activité si la mise à jour des objectifs échoue
       console.error('Erreur lors de la mise à jour automatique des objectifs:', error);
     }
   }
@@ -190,7 +173,6 @@ class ActivityService {
       }
     }
 
-    // Utiliser une requête optimisée avec agrégation SQL
     const statsQuery = `
       SELECT 
         COUNT(*) as total_activities,

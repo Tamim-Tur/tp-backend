@@ -4,7 +4,7 @@ const { registerValidation } = require('../middlewares/validation');
 const requestLogger = require('../middlewares/logger');
 
 const router = express.Router();
-router.use(requestLogger); // Logger pour toutes les routes auth
+router.use(requestLogger); 
 router.post('/register', registerValidation, register);
 router.post('/login', login);
 router.post('/refresh', refresh);

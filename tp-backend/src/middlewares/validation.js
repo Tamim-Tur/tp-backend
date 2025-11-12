@@ -61,14 +61,13 @@ const goalUpdateValidation = (req, res, next) => {
     start_date: Joi.date(),
     end_date: Joi.date(),
     status: Joi.string().valid('active', 'completed', 'cancelled')
-  }).min(1); // Au moins un champ doit être présent
+  }).min(1); 
 
   const { error } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
   
-  // Validation supplémentaire pour end_date si start_date est aussi présent
   if (req.body.start_date && req.body.end_date) {
     if (new Date(req.body.end_date) <= new Date(req.body.start_date)) {
       return res.status(400).json({ message: 'end_date doit être après start_date' });

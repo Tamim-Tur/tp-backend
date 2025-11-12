@@ -68,7 +68,6 @@ class Goal {
 
   static async updateProgress(goalId, userId, currentValue) {
     try {
-      // Vérifier d'abord si l'objectif existe
       const existingGoal = await this.findById(goalId);
       if (!existingGoal) {
         throw new Error('Objectif non trouvé');
@@ -95,11 +94,9 @@ class Goal {
       }
       return result.rows[0];
     } catch (error) {
-      // Si c'est déjà une erreur avec message, la relancer
       if (error.message === 'Objectif non trouvé' || error.message === 'Accès non autorisé') {
         throw error;
       }
-      // Sinon, logger et relancer avec un message générique
       console.error('[Goal.updateProgress] Erreur SQL:', error);
       throw new Error('Erreur lors de la mise à jour de l\'objectif');
     }

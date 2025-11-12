@@ -1,7 +1,4 @@
--- Script SQL pour créer les tables PostgreSQL
--- À exécuter manuellement dans PostgreSQL
 
--- Table des utilisateurs
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -11,11 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Index pour améliorer les performances
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
--- Table des activités sportives
 CREATE TABLE IF NOT EXISTS activities (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -29,13 +24,11 @@ CREATE TABLE IF NOT EXISTS activities (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Index pour améliorer les performances des requêtes
 CREATE INDEX IF NOT EXISTS idx_activities_user_id ON activities(user_id);
 CREATE INDEX IF NOT EXISTS idx_activities_type ON activities(type);
 CREATE INDEX IF NOT EXISTS idx_activities_date ON activities(date DESC);
 CREATE INDEX IF NOT EXISTS idx_activities_user_date ON activities(user_id, date DESC);
 
--- Table des objectifs (goals)
 CREATE TABLE IF NOT EXISTS goals (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -56,7 +49,6 @@ CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals(user_id);
 CREATE INDEX IF NOT EXISTS idx_goals_status ON goals(status);
 CREATE INDEX IF NOT EXISTS idx_goals_dates ON goals(start_date, end_date);
 
--- Table des défis (challenges)
 CREATE TABLE IF NOT EXISTS challenges (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -75,7 +67,6 @@ CREATE TABLE IF NOT EXISTS challenges (
 CREATE INDEX IF NOT EXISTS idx_challenges_user_id ON challenges(user_id);
 CREATE INDEX IF NOT EXISTS idx_challenges_status ON challenges(status);
 
--- Table des statistiques quotidiennes (pour optimiser les requêtes)
 CREATE TABLE IF NOT EXISTS daily_stats (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -91,7 +82,6 @@ CREATE TABLE IF NOT EXISTS daily_stats (
 
 CREATE INDEX IF NOT EXISTS idx_daily_stats_user_date ON daily_stats(user_id, date DESC);
 
--- Fonction pour mettre à jour updated_at automatiquement
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -100,7 +90,6 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Triggers pour mettre à jour updated_at
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -113,7 +102,6 @@ CREATE TRIGGER update_goals_updated_at BEFORE UPDATE ON goals
 CREATE TRIGGER update_challenges_updated_at BEFORE UPDATE ON challenges
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Vue pour les statistiques utilisateur (optimisation)
 CREATE OR REPLACE VIEW user_stats_view AS
 SELECT 
     u.id as user_id,

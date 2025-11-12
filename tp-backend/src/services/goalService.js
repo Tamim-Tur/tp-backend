@@ -13,7 +13,6 @@ class GoalService {
       startDate: goalData.start_date,
       endDate: goalData.end_date
     });
-    // Convertir les valeurs DECIMAL en nombres
     return {
       ...goal,
       current_value: parseFloat(goal.current_value) || 0,
@@ -23,11 +22,9 @@ class GoalService {
 
   static async getUserGoals(userId, status = null) {
     try {
-      // Vérifier et marquer les objectifs expirés avant de récupérer la liste
       await this.checkExpiredGoals(userId);
       
       const goals = await Goal.findByUserId(userId, status);
-      // S'assurer que current_value n'est jamais null et convertir en nombre
       return goals.map(goal => ({
         ...goal,
         current_value: parseFloat(goal.current_value) || 0,
@@ -47,7 +44,6 @@ class GoalService {
     if (goal.user_id !== userId) {
       throw new Error('Accès non autorisé');
     }
-    // Convertir les valeurs DECIMAL en nombres
     return {
       ...goal,
       current_value: parseFloat(goal.current_value) || 0,
@@ -64,7 +60,6 @@ class GoalService {
       throw new Error('Accès non autorisé');
     }
     const updatedGoal = await Goal.update(id, userId, updates);
-    // Convertir les valeurs DECIMAL en nombres
     return {
       ...updatedGoal,
       current_value: parseFloat(updatedGoal.current_value) || 0,
@@ -87,7 +82,6 @@ class GoalService {
     try {
       console.log(`[updateGoalProgress] Début - goalId: ${goalId}, userId: ${userId}`);
       
-      // Convertir en entier pour éviter les problèmes de type
       const goalIdInt = parseInt(goalId);
       const userIdInt = parseInt(userId);
       
@@ -103,7 +97,6 @@ class GoalService {
       
       console.log(`[updateGoalProgress] Objectif trouvé - user_id: ${goal.user_id}, type: ${goal.type}`);
       
-      // Comparaison plus robuste des IDs
       const goalUserId = parseInt(goal.user_id);
       
       if (goalUserId !== userIdInt) {
@@ -111,7 +104,6 @@ class GoalService {
         throw new Error('Accès non autorisé');
       }
 
-      // Calculer la progression basée sur les activités
       console.log(`[updateGoalProgress] Récupération des activités pour userId: ${userIdInt}`);
       const activities = await Activity.findByUserId(userIdInt);
       console.log(`[updateGoalProgress] ${activities.length} activités trouvées`);
@@ -123,11 +115,9 @@ class GoalService {
       
       console.log(`[updateGoalProgress] Période: ${startDate.toISOString()} - ${endDate.toISOString()}`);
       
-      // Filtrer les activités par date
       const relevantActivities = activities.filter(activity => {
         if (!activity) return false;
         
-        // Filtrer par date
         const activityDate = new Date(activity.date || activity.created_at);
         const isInRange = activityDate >= startDate && activityDate <= endDate;
         return isInRange;
@@ -162,7 +152,6 @@ class GoalService {
           currentValue = 0;
       }
 
-      // S'assurer que currentValue est un nombre
       currentValue = parseFloat(currentValue) || 0;
       
       console.log(`[updateGoalProgress] Valeur calculée: ${currentValue} pour type: ${goal.type}`);
@@ -177,7 +166,6 @@ class GoalService {
       
       console.log(`[updateGoalProgress] Objectif mis à jour avec succès`);
 
-      // Convertir les valeurs DECIMAL en nombres
       return {
         ...updatedGoal,
         current_value: parseFloat(updatedGoal.current_value) || 0,
@@ -190,7 +178,6 @@ class GoalService {
     }
   }
   
-  // Méthode pour vérifier et marquer automatiquement les objectifs expirés comme "cancelled"
   static async checkExpiredGoals(userId) {
     try {
       const now = new Date();
