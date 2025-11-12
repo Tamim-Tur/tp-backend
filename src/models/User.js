@@ -19,7 +19,7 @@ class User {
   }
 
   static async findById(id) {
-    const query = 'SELECT id, email, role, created_at FROM users WHERE id = $1';
+    const query = 'SELECT id, email, password, role, created_at FROM users WHERE id = $1';
     const result = await pgPool.query(query, [id]);
     return result.rows[0];
   }

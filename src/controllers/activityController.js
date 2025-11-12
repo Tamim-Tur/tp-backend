@@ -23,6 +23,12 @@ exports.getActivity = async (req, res, next) => {
     const activity = await ActivityService.getActivityById(req.params.id, req.user.id);
     res.json(activity);
   } catch (error) {
+    if (error && error.message === 'Activité non trouvée') {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error && error.message === 'Accès non autorisé') {
+      return res.status(403).json({ message: error.message });
+    }
     next(error);
   }
 };
@@ -32,6 +38,12 @@ exports.deleteActivity = async (req, res, next) => {
     await ActivityService.deleteActivity(req.params.id, req.user.id);
     res.json({ message: 'Activité supprimée avec succès' });
   } catch (error) {
+    if (error && error.message === 'Activité non trouvée') {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error && error.message === 'Accès non autorisé') {
+      return res.status(403).json({ message: error.message });
+    }
     next(error);
   }
 };

@@ -22,10 +22,9 @@ app.use(limiter);
 app.use(express.json());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
-app.use('/api/activities', require('./routes/activities'));
+app.use('/api/activities', require('./routes/activites'));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -39,10 +38,12 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route non trouvée' });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-  console.log(`📚 Documentation: http://localhost:${PORT}/api-docs`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+    console.log(`📚 Documentation: http://localhost:${PORT}/api-docs`);
+  });
+}
 
 module.exports = app;

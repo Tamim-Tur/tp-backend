@@ -204,14 +204,12 @@ exports.getUserStats = async (req, res, next) => {
       ORDER BY count DESC
     `;
 
-    // Séances d'entraînement
     const workoutsQuery = `
       SELECT COUNT(*) as total_workouts
       FROM workouts 
       WHERE user_id = $1 ${dateFilter.replace('date', 'created_at')}
     `;
 
-    // Repas nutritionnels
     const mealsQuery = `
       SELECT 
         COUNT(*) as total_meals,
