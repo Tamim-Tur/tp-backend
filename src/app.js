@@ -38,12 +38,7 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route non trouvée' });
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-    console.log(`📚 Documentation: http://localhost:${PORT}/api-docs`);
-  });
-}
+
+
 
 module.exports = app;
