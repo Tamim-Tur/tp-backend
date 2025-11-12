@@ -20,3 +20,4 @@ router.get('/:id', getActivity);
 router.delete('/:id', deleteActivity);
 
 module.exports = router;
+
