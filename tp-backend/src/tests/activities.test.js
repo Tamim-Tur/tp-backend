@@ -224,8 +224,8 @@ describe('Activities API', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('totalActivities', 2);
     expect(res.body).toHaveProperty('totalDuration', 90);
-    expect(res.body.activitiesByType.running).toBe(1);
-    expect(res.body.activitiesByType.cycling).toBe(1);
+    expect(res.body.activitiesByType.running).toHaveProperty('count', 1);
+    expect(res.body.activitiesByType.cycling).toHaveProperty('count', 1);
   });
 });
 
