@@ -53,7 +53,7 @@ class ActivityService {
           const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
           const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
           
-          // Filtrer les activités dans la période de l'objectif ET par type d'activité si spécifié
+          // Filtrer les activités dans la période de l'objectif
           const relevantActivities = activities.filter(activity => {
             if (!activity) return false;
             
@@ -63,23 +63,14 @@ class ActivityService {
             const activityDateOnly = new Date(activityDate.getFullYear(), activityDate.getMonth(), activityDate.getDate());
             
             const isInRange = activityDateOnly >= startDateOnly && activityDateOnly <= endDateOnly;
-            if (!isInRange) return false;
-            
-            // Filtrer par type d'activité si l'objectif a un activity_type spécifié
-            if (goal.activity_type) {
-              const matchesActivityType = activity.type === goal.activity_type;
-              if (!matchesActivityType) {
-                return false;
-              }
-              console.log(`[updateActiveGoals] Activité ${activity.id} (${activity.type}) du ${activityDateOnly.toISOString().split('T')[0]} incluse - correspond au type d'objectif (${goal.activity_type})`);
-            } else {
+            if (isInRange) {
               console.log(`[updateActiveGoals] Activité ${activity.id} (${activity.type}) du ${activityDateOnly.toISOString().split('T')[0]} incluse`);
             }
             
-            return true;
+            return isInRange;
           });
           
-          console.log(`[updateActiveGoals] Objectif ${goal.id}: ${relevantActivities.length} activités dans la période${goal.activity_type ? ` (type: ${goal.activity_type})` : ''}`);
+          console.log(`[updateActiveGoals] Objectif ${goal.id}: ${relevantActivities.length} activités dans la période`);
           
           let currentValue = 0;
           

@@ -37,8 +37,7 @@ const goalValidation = (req, res, next) => {
     target_value: Joi.number().min(0.01).required(),
     start_date: Joi.date().required(),
     end_date: Joi.date().greater(Joi.ref('start_date')).required(),
-    status: Joi.string().valid('active', 'completed', 'cancelled'),
-    activity_type: Joi.string().valid('running', 'cycling', 'swimming', 'walking', 'gym', 'yoga', 'hiking', 'tennis', 'basketball', 'football').allow('', null)
+    status: Joi.string().valid('active', 'completed', 'cancelled')
   });
 
   const { error } = schema.validate(req.body);

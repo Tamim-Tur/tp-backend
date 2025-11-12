@@ -11,8 +11,7 @@ class GoalService {
       type: goalData.type,
       targetValue: parseFloat(goalData.target_value),
       startDate: goalData.start_date,
-      endDate: goalData.end_date,
-      activityType: goalData.activity_type || null
+      endDate: goalData.end_date
     });
     // Convertir les valeurs DECIMAL en nombres
     return {
@@ -124,28 +123,17 @@ class GoalService {
       
       console.log(`[updateGoalProgress] Période: ${startDate.toISOString()} - ${endDate.toISOString()}`);
       
-      // Filtrer les activités par date ET par type d'activité si spécifié
+      // Filtrer les activités par date
       const relevantActivities = activities.filter(activity => {
         if (!activity) return false;
         
         // Filtrer par date
         const activityDate = new Date(activity.date || activity.created_at);
         const isInRange = activityDate >= startDate && activityDate <= endDate;
-        if (!isInRange) return false;
-        
-        // Filtrer par type d'activité si l'objectif a un activity_type spécifié
-        if (goal.activity_type) {
-          const matchesActivityType = activity.type === goal.activity_type;
-          if (!matchesActivityType) {
-            console.log(`[updateGoalProgress] Activité ${activity.id} (${activity.type}) exclue - ne correspond pas au type d'objectif (${goal.activity_type})`);
-            return false;
-          }
-        }
-        
-        return true;
+        return isInRange;
       });
       
-      console.log(`[updateGoalProgress] ${relevantActivities.length} activités dans la période${goal.activity_type ? ` (type: ${goal.activity_type})` : ''}`);
+      console.log(`[updateGoalProgress] ${relevantActivities.length} activités dans la période`);
 
       switch (goal.type) {
         case 'duration':

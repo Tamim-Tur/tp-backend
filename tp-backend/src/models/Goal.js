@@ -1,13 +1,13 @@
 const { pgPool } = require('../config/database');
 
 class Goal {
-  static async create({ userId, title, description, type, targetValue, startDate, endDate, activityType = null }) {
+  static async create({ userId, title, description, type, targetValue, startDate, endDate }) {
     const query = `
-      INSERT INTO goals (user_id, title, description, type, target_value, start_date, end_date, activity_type) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      INSERT INTO goals (user_id, title, description, type, target_value, start_date, end_date) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7) 
       RETURNING *
     `;
-    const values = [userId, title, description, type, targetValue, startDate, endDate, activityType];
+    const values = [userId, title, description, type, targetValue, startDate, endDate];
     const result = await pgPool.query(query, values);
     return result.rows[0];
   }
@@ -33,7 +33,7 @@ class Goal {
   }
 
   static async update(id, userId, updates) {
-    const allowedFields = ['title', 'description', 'target_value', 'current_value', 'start_date', 'end_date', 'status', 'activity_type'];
+    const allowedFields = ['title', 'description', 'target_value', 'current_value', 'start_date', 'end_date', 'status'];
     const setClause = [];
     const values = [];
     let paramCount = 1;
