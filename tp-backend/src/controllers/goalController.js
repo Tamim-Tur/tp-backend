@@ -11,10 +11,14 @@ exports.createGoal = async (req, res, next) => {
 
 exports.getUserGoals = async (req, res, next) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    }
     const { status } = req.query;
     const goals = await GoalService.getUserGoals(req.user.id, status);
     res.json(goals);
   } catch (error) {
+    console.error('Erreur dans getUserGoals controller:', error);
     next(error);
   }
 };
@@ -66,10 +70,14 @@ exports.deleteGoal = async (req, res, next) => {
 
 exports.updateProgress = async (req, res, next) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Utilisateur non authentifié' });
+    }
     const goal = await GoalService.updateGoalProgress(req.params.id, req.user.id);
     res.json(goal);
   } catch (error) {
-    if (error.message === 'Objectif non trouvé') {
+    console.error('Erreur dans updateProgress controller:', error);
+    if (error.message === 'Objectif non trouvé' || error.message.includes('non trouvé')) {
       return res.status(404).json({ message: error.message });
     }
     next(error);

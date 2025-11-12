@@ -63,10 +63,19 @@ app.use('/api/activities', require('./routes/activites'));
 app.use('/api/goals', require('./routes/goals'));
 
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('=== ERREUR SERVEUR ===');
+  console.error('Message:', err.message);
+  console.error('Stack:', err.stack);
+  console.error('URL:', req.originalUrl);
+  console.error('Method:', req.method);
+  console.error('Body:', req.body);
+  console.error('========================');
   res.status(500).json({ 
     message: 'Erreur serveur', 
-    error: process.env.NODE_ENV === 'production' ? {} : err 
+    error: process.env.NODE_ENV === 'production' ? {} : {
+      message: err.message,
+      stack: err.stack
+    }
   });
 });
 

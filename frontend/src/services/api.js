@@ -49,6 +49,14 @@ class ApiService {
       }
 
       if (!response.ok) {
+        // Si erreur 401, le token est probablement expiré
+        if (response.status === 401) {
+          this.setToken(null);
+          // Rediriger vers la page de login si on est dans le navigateur
+          if (typeof window !== 'undefined') {
+            window.location.reload();
+          }
+        }
         throw new Error(data.message || `Erreur ${response.status}: Une erreur est survenue`);
       }
 

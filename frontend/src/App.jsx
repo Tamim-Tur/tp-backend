@@ -3,6 +3,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
 import Activities from './components/Activities';
+import Goals from './components/Goals';
 import Dashboard from './components/Dashboard';
 import Users from './components/Users';
 import api from './services/api';
@@ -26,7 +27,9 @@ function App() {
       setUser(profile);
       setCurrentView('activities');
     } catch (err) {
+      console.error('Erreur vérification auth:', err);
       api.setToken(null);
+      setUser(null);
       setCurrentView('login');
     }
   };
@@ -63,6 +66,12 @@ function App() {
                 className={currentView === 'activities' ? 'active' : ''}
               >
                 🏋️ Activités
+              </button>
+              <button
+                onClick={() => setCurrentView('goals')}
+                className={currentView === 'goals' ? 'active' : ''}
+              >
+                🎯 Objectifs
               </button>
               <button
                 onClick={() => setCurrentView('profile')}
@@ -112,6 +121,7 @@ function App() {
           <>
             {currentView === 'dashboard' && <Dashboard />}
             {currentView === 'activities' && <Activities />}
+            {currentView === 'goals' && <Goals />}
             {currentView === 'profile' && <Profile onLogout={handleLogout} />}
             {currentView === 'users' && user.role === 'admin' && <Users />}
           </>

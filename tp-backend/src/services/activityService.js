@@ -1,11 +1,128 @@
 const Activity = require('../models/Activity');
+const Goal = require('../models/Goal');
+const { pgPool } = require('../config/database');
 
 class ActivityService {
   static async createActivity(activityData, userId) {
-    return await Activity.create({
+    console.log(`[createActivity] Création d'une activité pour userId: ${userId}`);
+    const activity = await Activity.create({
       ...activityData,
       userId
     });
+    
+    console.log(`[createActivity] Activité créée avec succès (id: ${activity.id})`);
+    
+    // Mettre à jour automatiquement les objectifs actifs
+    try {
+      console.log(`[createActivity] Déclenchement de la mise à jour automatique des objectifs...`);
+      await this.updateActiveGoals(userId);
+      console.log(`[createActivity] Mise à jour des objectifs terminée`);
+    } catch (error) {
+      // Ne pas faire échouer la création d'activité si la mise à jour des objectifs échoue
+      console.error('[createActivity] Erreur lors de la mise à jour automatique des objectifs:', error);
+      console.error('[createActivity] Stack:', error.stack);
+    }
+    
+    return activity;
+  }
+  
+  // Méthode pour mettre à jour automatiquement tous les objectifs actifs d'un utilisateur
+  static async updateActiveGoals(userId) {
+    try {
+      // Récupérer tous les objectifs actifs de l'utilisateur
+      const activeGoals = await Goal.findByUserId(userId, 'active');
+      
+      if (activeGoals.length === 0) {
+        return;
+      }
+      
+      // Récupérer toutes les activités de l'utilisateur
+      const activities = await Activity.findByUserId(userId);
+      
+      // Mettre à jour chaque objectif actif
+      for (const goal of activeGoals) {
+        try {
+          const startDate = new Date(goal.start_date);
+          const endDate = new Date(goal.end_date);
+          // Ajouter un jour à la fin pour inclure toute la journée de fin
+          endDate.setHours(23, 59, 59, 999);
+          
+          console.log(`[updateActiveGoals] Traitement objectif ${goal.id} (${goal.title}) - Période: ${startDate.toISOString().split('T')[0]} à ${endDate.toISOString().split('T')[0]}`);
+          
+          // Normaliser les dates pour la comparaison (sans l'heure)
+          const startDateOnly = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+          const endDateOnly = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+          
+          // Filtrer les activités dans la période de l'objectif ET par type d'activité si spécifié
+          const relevantActivities = activities.filter(activity => {
+            if (!activity) return false;
+            
+            // Filtrer par date
+            const activityDate = new Date(activity.date || activity.created_at);
+            // Comparer seulement les dates (sans l'heure)
+            const activityDateOnly = new Date(activityDate.getFullYear(), activityDate.getMonth(), activityDate.getDate());
+            
+            const isInRange = activityDateOnly >= startDateOnly && activityDateOnly <= endDateOnly;
+            if (!isInRange) return false;
+            
+            // Filtrer par type d'activité si l'objectif a un activity_type spécifié
+            if (goal.activity_type) {
+              const matchesActivityType = activity.type === goal.activity_type;
+              if (!matchesActivityType) {
+                return false;
+              }
+              console.log(`[updateActiveGoals] Activité ${activity.id} (${activity.type}) du ${activityDateOnly.toISOString().split('T')[0]} incluse - correspond au type d'objectif (${goal.activity_type})`);
+            } else {
+              console.log(`[updateActiveGoals] Activité ${activity.id} (${activity.type}) du ${activityDateOnly.toISOString().split('T')[0]} incluse`);
+            }
+            
+            return true;
+          });
+          
+          console.log(`[updateActiveGoals] Objectif ${goal.id}: ${relevantActivities.length} activités dans la période${goal.activity_type ? ` (type: ${goal.activity_type})` : ''}`);
+          
+          let currentValue = 0;
+          
+          // Calculer la valeur actuelle selon le type d'objectif
+          switch (goal.type) {
+            case 'duration':
+              currentValue = relevantActivities.reduce((sum, act) => {
+                return sum + (parseFloat(act.duration) || 0);
+              }, 0);
+              break;
+            case 'distance':
+              currentValue = relevantActivities.reduce((sum, act) => {
+                return sum + (parseFloat(act.distance) || 0);
+              }, 0);
+              break;
+            case 'calories':
+              currentValue = relevantActivities.reduce((sum, act) => {
+                return sum + (parseFloat(act.calories) || 0);
+              }, 0);
+              break;
+            case 'activities_count':
+              currentValue = relevantActivities.length;
+              break;
+          }
+          
+          currentValue = parseFloat(currentValue) || 0;
+          
+          console.log(`[updateActiveGoals] Objectif ${goal.id}: valeur calculée = ${currentValue}, cible = ${goal.target_value}`);
+          
+          // Mettre à jour l'objectif (le statut sera automatiquement mis à 'completed' si current_value >= target_value)
+          const updatedGoal = await Goal.updateProgress(goal.id, userId, currentValue);
+          
+          if (updatedGoal && updatedGoal.status === 'completed') {
+            console.log(`[updateActiveGoals] ✅ Objectif ${goal.id} (${goal.title}) est maintenant COMPLÉTÉ !`);
+          }
+        } catch (error) {
+          console.error(`Erreur lors de la mise à jour de l'objectif ${goal.id}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error('Erreur dans updateActiveGoals:', error);
+      throw error;
+    }
   }
 
   static async getUserActivities(userId) {
@@ -32,6 +149,14 @@ class ActivityService {
       throw new Error('Accès non autorisé');
     }
     await Activity.delete(id, userId);
+    
+    // Mettre à jour automatiquement les objectifs actifs après suppression
+    try {
+      await this.updateActiveGoals(userId);
+    } catch (error) {
+      // Ne pas faire échouer la suppression d'activité si la mise à jour des objectifs échoue
+      console.error('Erreur lors de la mise à jour automatique des objectifs:', error);
+    }
   }
 
   static async getUserStats(userId, period = 'all') {

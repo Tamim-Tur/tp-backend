@@ -1,16 +1,43 @@
 const Goal = require('../models/Goal');
 const Activity = require('../models/Activity');
+const { pgPool } = require('../config/database');
 
 class GoalService {
   static async createGoal(goalData, userId) {
-    return await Goal.create({
-      ...goalData,
-      userId
+    const goal = await Goal.create({
+      userId,
+      title: goalData.title,
+      description: goalData.description,
+      type: goalData.type,
+      targetValue: parseFloat(goalData.target_value),
+      startDate: goalData.start_date,
+      endDate: goalData.end_date,
+      activityType: goalData.activity_type || null
     });
+    // Convertir les valeurs DECIMAL en nombres
+    return {
+      ...goal,
+      current_value: parseFloat(goal.current_value) || 0,
+      target_value: parseFloat(goal.target_value) || 0
+    };
   }
 
   static async getUserGoals(userId, status = null) {
-    return await Goal.findByUserId(userId, status);
+    try {
+      // Vérifier et marquer les objectifs expirés avant de récupérer la liste
+      await this.checkExpiredGoals(userId);
+      
+      const goals = await Goal.findByUserId(userId, status);
+      // S'assurer que current_value n'est jamais null et convertir en nombre
+      return goals.map(goal => ({
+        ...goal,
+        current_value: parseFloat(goal.current_value) || 0,
+        target_value: parseFloat(goal.target_value) || 0
+      }));
+    } catch (error) {
+      console.error('Erreur dans getUserGoals:', error);
+      throw error;
+    }
   }
 
   static async getGoalById(id, userId) {
@@ -21,7 +48,12 @@ class GoalService {
     if (goal.user_id !== userId) {
       throw new Error('Accès non autorisé');
     }
-    return goal;
+    // Convertir les valeurs DECIMAL en nombres
+    return {
+      ...goal,
+      current_value: parseFloat(goal.current_value) || 0,
+      target_value: parseFloat(goal.target_value) || 0
+    };
   }
 
   static async updateGoal(id, userId, updates) {
@@ -32,7 +64,13 @@ class GoalService {
     if (goal.user_id !== userId) {
       throw new Error('Accès non autorisé');
     }
-    return await Goal.update(id, userId, updates);
+    const updatedGoal = await Goal.update(id, userId, updates);
+    // Convertir les valeurs DECIMAL en nombres
+    return {
+      ...updatedGoal,
+      current_value: parseFloat(updatedGoal.current_value) || 0,
+      target_value: parseFloat(updatedGoal.target_value) || 0
+    };
   }
 
   static async deleteGoal(id, userId) {
@@ -47,39 +85,148 @@ class GoalService {
   }
 
   static async updateGoalProgress(goalId, userId) {
-    const goal = await Goal.findById(goalId);
-    if (!goal || goal.user_id !== userId) {
-      throw new Error('Objectif non trouvé');
+    try {
+      console.log(`[updateGoalProgress] Début - goalId: ${goalId}, userId: ${userId}`);
+      
+      // Convertir en entier pour éviter les problèmes de type
+      const goalIdInt = parseInt(goalId);
+      const userIdInt = parseInt(userId);
+      
+      if (isNaN(goalIdInt) || isNaN(userIdInt)) {
+        throw new Error('ID invalide');
+      }
+      
+      const goal = await Goal.findById(goalIdInt);
+      if (!goal) {
+        console.log(`[updateGoalProgress] Objectif ${goalIdInt} non trouvé`);
+        throw new Error('Objectif non trouvé');
+      }
+      
+      console.log(`[updateGoalProgress] Objectif trouvé - user_id: ${goal.user_id}, type: ${goal.type}`);
+      
+      // Comparaison plus robuste des IDs
+      const goalUserId = parseInt(goal.user_id);
+      
+      if (goalUserId !== userIdInt) {
+        console.log(`[updateGoalProgress] Accès refusé - goal.user_id: ${goalUserId}, userId: ${userIdInt}`);
+        throw new Error('Accès non autorisé');
+      }
+
+      // Calculer la progression basée sur les activités
+      console.log(`[updateGoalProgress] Récupération des activités pour userId: ${userIdInt}`);
+      const activities = await Activity.findByUserId(userIdInt);
+      console.log(`[updateGoalProgress] ${activities.length} activités trouvées`);
+      
+      let currentValue = 0;
+
+      const startDate = new Date(goal.start_date);
+      const endDate = new Date(goal.end_date);
+      
+      console.log(`[updateGoalProgress] Période: ${startDate.toISOString()} - ${endDate.toISOString()}`);
+      
+      // Filtrer les activités par date ET par type d'activité si spécifié
+      const relevantActivities = activities.filter(activity => {
+        if (!activity) return false;
+        
+        // Filtrer par date
+        const activityDate = new Date(activity.date || activity.created_at);
+        const isInRange = activityDate >= startDate && activityDate <= endDate;
+        if (!isInRange) return false;
+        
+        // Filtrer par type d'activité si l'objectif a un activity_type spécifié
+        if (goal.activity_type) {
+          const matchesActivityType = activity.type === goal.activity_type;
+          if (!matchesActivityType) {
+            console.log(`[updateGoalProgress] Activité ${activity.id} (${activity.type}) exclue - ne correspond pas au type d'objectif (${goal.activity_type})`);
+            return false;
+          }
+        }
+        
+        return true;
+      });
+      
+      console.log(`[updateGoalProgress] ${relevantActivities.length} activités dans la période${goal.activity_type ? ` (type: ${goal.activity_type})` : ''}`);
+
+      switch (goal.type) {
+        case 'duration':
+          currentValue = relevantActivities.reduce((sum, act) => {
+            const duration = parseFloat(act.duration) || 0;
+            return sum + duration;
+          }, 0);
+          break;
+        case 'distance':
+          currentValue = relevantActivities.reduce((sum, act) => {
+            const distance = parseFloat(act.distance) || 0;
+            return sum + distance;
+          }, 0);
+          break;
+        case 'calories':
+          currentValue = relevantActivities.reduce((sum, act) => {
+            const calories = parseFloat(act.calories) || 0;
+            return sum + calories;
+          }, 0);
+          break;
+        case 'activities_count':
+          currentValue = relevantActivities.length;
+          break;
+        default:
+          console.warn(`[updateGoalProgress] Type d'objectif inconnu: ${goal.type}`);
+          currentValue = 0;
+      }
+
+      // S'assurer que currentValue est un nombre
+      currentValue = parseFloat(currentValue) || 0;
+      
+      console.log(`[updateGoalProgress] Valeur calculée: ${currentValue} pour type: ${goal.type}`);
+
+      console.log(`[updateGoalProgress] Mise à jour de l'objectif ${goalIdInt} avec currentValue: ${currentValue}`);
+      const updatedGoal = await Goal.updateProgress(goalIdInt, userIdInt, currentValue);
+      
+      if (!updatedGoal) {
+        console.error(`[updateGoalProgress] updatedGoal est null/undefined`);
+        throw new Error('Erreur lors de la mise à jour de l\'objectif');
+      }
+      
+      console.log(`[updateGoalProgress] Objectif mis à jour avec succès`);
+
+      // Convertir les valeurs DECIMAL en nombres
+      return {
+        ...updatedGoal,
+        current_value: parseFloat(updatedGoal.current_value) || 0,
+        target_value: parseFloat(updatedGoal.target_value) || 0
+      };
+    } catch (error) {
+      console.error('Erreur dans updateGoalProgress:', error);
+      console.error('Stack:', error.stack);
+      throw error;
     }
-
-    // Calculer la progression basée sur les activités
-    const activities = await Activity.findByUserId(userId);
-    let currentValue = 0;
-
-    const startDate = new Date(goal.start_date);
-    const endDate = new Date(goal.end_date);
-    
-    const relevantActivities = activities.filter(activity => {
-      const activityDate = new Date(activity.date || activity.created_at);
-      return activityDate >= startDate && activityDate <= endDate;
-    });
-
-    switch (goal.type) {
-      case 'duration':
-        currentValue = relevantActivities.reduce((sum, act) => sum + (act.duration || 0), 0);
-        break;
-      case 'distance':
-        currentValue = relevantActivities.reduce((sum, act) => sum + (act.distance || 0), 0);
-        break;
-      case 'calories':
-        currentValue = relevantActivities.reduce((sum, act) => sum + (act.calories || 0), 0);
-        break;
-      case 'activities_count':
-        currentValue = relevantActivities.length;
-        break;
+  }
+  
+  // Méthode pour vérifier et marquer automatiquement les objectifs expirés comme "cancelled"
+  static async checkExpiredGoals(userId) {
+    try {
+      const now = new Date();
+      const query = `
+        UPDATE goals 
+        SET status = 'cancelled',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = $1 
+          AND status = 'active'
+          AND end_date < $2
+          AND current_value < target_value
+        RETURNING id, title
+      `;
+      const result = await pgPool.query(query, [userId, now]);
+      
+      if (result.rows.length > 0) {
+        console.log(`[checkExpiredGoals] ${result.rows.length} objectif(s) expiré(s) marqué(s) comme annulé(s)`);
+      }
+      
+      return result.rows;
+    } catch (error) {
+      console.error('Erreur dans checkExpiredGoals:', error);
+      throw error;
     }
-
-    return await Goal.updateProgress(goalId, userId, currentValue);
   }
 }
 

@@ -1,13 +1,13 @@
 const { pgPool } = require('../config/database');
 
 class Goal {
-  static async create({ userId, title, description, type, targetValue, startDate, endDate }) {
+  static async create({ userId, title, description, type, targetValue, startDate, endDate, activityType = null }) {
     const query = `
-      INSERT INTO goals (user_id, title, description, type, target_value, start_date, end_date) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      INSERT INTO goals (user_id, title, description, type, target_value, start_date, end_date, activity_type) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
       RETURNING *
     `;
-    const values = [userId, title, description, type, targetValue, startDate, endDate];
+    const values = [userId, title, description, type, targetValue, startDate, endDate, activityType];
     const result = await pgPool.query(query, values);
     return result.rows[0];
   }
@@ -33,7 +33,7 @@ class Goal {
   }
 
   static async update(id, userId, updates) {
-    const allowedFields = ['title', 'description', 'target_value', 'current_value', 'start_date', 'end_date', 'status'];
+    const allowedFields = ['title', 'description', 'target_value', 'current_value', 'start_date', 'end_date', 'status', 'activity_type'];
     const setClause = [];
     const values = [];
     let paramCount = 1;
@@ -67,19 +67,42 @@ class Goal {
   }
 
   static async updateProgress(goalId, userId, currentValue) {
-    const query = `
-      UPDATE goals 
-      SET current_value = $1, 
-          status = CASE 
-            WHEN $1 >= target_value THEN 'completed'
-            ELSE status
-          END,
-          updated_at = CURRENT_TIMESTAMP
-      WHERE id = $2 AND user_id = $3
-      RETURNING *
-    `;
-    const result = await pgPool.query(query, [currentValue, goalId, userId]);
-    return result.rows[0];
+    try {
+      // Vérifier d'abord si l'objectif existe
+      const existingGoal = await this.findById(goalId);
+      if (!existingGoal) {
+        throw new Error('Objectif non trouvé');
+      }
+      if (parseInt(existingGoal.user_id) !== parseInt(userId)) {
+        throw new Error('Accès non autorisé');
+      }
+
+      const query = `
+        UPDATE goals 
+        SET current_value = $1, 
+            status = CASE 
+              WHEN $1 >= target_value THEN 'completed'
+              ELSE status
+            END,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $2 AND user_id = $3
+        RETURNING *
+      `;
+      const result = await pgPool.query(query, [currentValue, goalId, userId]);
+      
+      if (!result.rows || result.rows.length === 0) {
+        throw new Error('Erreur lors de la mise à jour de l\'objectif');
+      }
+      return result.rows[0];
+    } catch (error) {
+      // Si c'est déjà une erreur avec message, la relancer
+      if (error.message === 'Objectif non trouvé' || error.message === 'Accès non autorisé') {
+        throw error;
+      }
+      // Sinon, logger et relancer avec un message générique
+      console.error('[Goal.updateProgress] Erreur SQL:', error);
+      throw new Error('Erreur lors de la mise à jour de l\'objectif');
+    }
   }
 }
 

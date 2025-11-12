@@ -47,8 +47,10 @@ function Dashboard() {
   };
 
   const getProgressPercentage = (current, target) => {
-    if (!target || target === 0) return 0;
-    const percentage = (current / target) * 100;
+    const currentNum = parseFloat(current) || 0;
+    const targetNum = parseFloat(target) || 0;
+    if (!targetNum || targetNum === 0) return 0;
+    const percentage = (currentNum / targetNum) * 100;
     return Math.min(percentage, 100);
   };
 
@@ -118,7 +120,7 @@ function Dashboard() {
             <div className="stat-icon">📏</div>
             <div className="stat-content">
               <div className="stat-label">Distance</div>
-              <div className="stat-value">{stats.totalDistance.toFixed(1)} km</div>
+              <div className="stat-value">{(parseFloat(stats.totalDistance) || 0).toFixed(1)} km</div>
             </div>
           </div>
         </div>
@@ -152,7 +154,7 @@ function Dashboard() {
                         ></div>
                       </div>
                       <div className="progress-text">
-                        {goal.current_value.toFixed(1)} / {goal.target_value} {goal.type}
+                        {(parseFloat(goal.current_value) || 0).toFixed(1)} / {parseFloat(goal.target_value) || 0} {goal.type}
                         <span className="progress-percentage">({progress.toFixed(0)}%)</span>
                       </div>
                     </div>
