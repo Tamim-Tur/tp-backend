@@ -92,7 +92,19 @@ function App() {
                 )}
               </nav>
               <div className="user-actions">
-                <span className="user-name">{user.email}</span>
+                <span className="user-name">
+                  {user.email}
+                  {user.role === 'admin' && (
+                    <span style={{ 
+                      marginLeft: '8px', 
+                      fontSize: '12px', 
+                      color: '#f44336',
+                      fontWeight: 'bold'
+                    }}>
+                      Admin
+                    </span>
+                  )}
+                </span>
                 <button onClick={handleLogout} className="btn-logout">
                   Déconnexion
                 </button>

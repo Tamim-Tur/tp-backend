@@ -77,12 +77,13 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: var(--spacing-lg);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .logo-section {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .app-header h1 {
@@ -90,14 +91,17 @@ body {
   font-weight: 700;
   color: var(--primary-color);
   margin: 0;
+  white-space: nowrap;
 }
 
 .nav-menu {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   flex: 1;
   justify-content: center;
+  align-items: center;
+  min-width: 0;
 }
 
 .nav-menu button {
@@ -129,7 +133,9 @@ body {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .user-name {

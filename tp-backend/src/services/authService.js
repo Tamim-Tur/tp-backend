@@ -29,6 +29,7 @@ class AuthService {
     if (!isValidPassword) {
       throw new Error('Email ou mot de passe incorrect');
     }
+
     const accessToken = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_SECRET,
