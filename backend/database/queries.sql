@@ -1,17 +1,12 @@
-SELECT id, email, role, created_at 
-FROM users 
+SELECT id, email, role, created_at
+FROM users
 ORDER BY created_at DESC;
-
 
 SELECT COUNT(*) as total_utilisateurs FROM users;
 
+SELECT role, COUNT(*) as nombre FROM users GROUP BY role;
 
-SELECT role, COUNT(*) as nombre 
-FROM users 
-GROUP BY role;
-
-
-SELECT 
+SELECT
     a.id,
     u.email as utilisateur,
     a.type,
@@ -21,23 +16,22 @@ SELECT
     a.date,
     a.created_at
 FROM activities a
-JOIN users u ON a.user_id = u.id
+    JOIN users u ON a.user_id = u.id
 ORDER BY a.date DESC;
 
-
-SELECT 
+SELECT
     type,
     duration,
     calories,
     distance,
     date,
     notes
-FROM activities 
-WHERE user_id = 1
+FROM activities
+WHERE
+    user_id = 1
 ORDER BY date DESC;
 
-
-SELECT 
+SELECT
     u.id,
     u.email,
     COUNT(a.id) as nombre_activites,
@@ -45,21 +39,22 @@ SELECT
     COALESCE(SUM(a.calories), 0) as calories_totales,
     COALESCE(SUM(a.distance), 0) as distance_totale_km
 FROM users u
-LEFT JOIN activities a ON u.id = a.user_id
-GROUP BY u.id, u.email
+    LEFT JOIN activities a ON u.id = a.user_id
+GROUP BY
+    u.id,
+    u.email
 ORDER BY nombre_activites DESC;
 
-
-SELECT 
+SELECT
     type,
     COUNT(*) as nombre,
     AVG(duration) as duree_moyenne_minutes,
     SUM(calories) as calories_totales,
     SUM(distance) as distance_totale_km
 FROM activities
-GROUP BY type
+GROUP BY
+    type
 ORDER BY nombre DESC;
-
 
 SELECT 
     g.id,
@@ -76,13 +71,10 @@ FROM goals g
 JOIN users u ON g.user_id = u.id
 ORDER BY g.created_at DESC;
 
-
-SELECT 
-    status,
-    COUNT(*) as nombre
+SELECT status, COUNT(*) as nombre
 FROM goals
-GROUP BY status;
-
+GROUP BY
+    status;
 
 SELECT 
     u.email,
@@ -97,8 +89,7 @@ JOIN users u ON g.user_id = u.id
 WHERE g.status = 'active'
 ORDER BY pourcentage_complete DESC;
 
-
-SELECT 
+SELECT
     c.id,
     u.email as utilisateur,
     c.name as nom,
@@ -109,92 +100,104 @@ SELECT
     c.start_date as date_debut,
     c.end_date as date_fin
 FROM challenges c
-JOIN users u ON c.user_id = u.id
+    JOIN users u ON c.user_id = u.id
 ORDER BY c.created_at DESC;
 
-
-SELECT 
-    u.email,
-    a.type,
-    a.duration,
-    a.calories,
-    a.distance,
-    a.date
+SELECT u.email, a.type, a.duration, a.calories, a.distance, a.date
 FROM activities a
-JOIN users u ON a.user_id = u.id
-WHERE a.date >= NOW() - INTERVAL '7 days'
+    JOIN users u ON a.user_id = u.id
+WHERE
+    a.date >= NOW() - INTERVAL '7 days'
 ORDER BY a.date DESC;
 
-
-SELECT 
-    DATE_TRUNC('month', date) as mois,
+SELECT
+    DATE_TRUNC ('month', date) as mois,
     COUNT(*) as nombre_activites,
     SUM(duration) as duree_totale,
     SUM(calories) as calories_totales
 FROM activities
-GROUP BY DATE_TRUNC('month', date)
+GROUP BY
+    DATE_TRUNC ('month', date)
 ORDER BY mois DESC;
 
-
-SELECT 
+SELECT
     u.email,
     COUNT(a.id) as nombre_activites,
     SUM(a.calories) as calories_totales
 FROM users u
-JOIN activities a ON u.id = a.user_id
-GROUP BY u.id, u.email
+    JOIN activities a ON u.id = a.user_id
+GROUP BY
+    u.id,
+    u.email
 ORDER BY calories_totales DESC
 LIMIT 10;
 
-
-SELECT 
-    u.email,
-    a.type,
-    a.duration,
-    a.calories,
-    a.distance
+SELECT u.email, a.type, a.duration, a.calories, a.distance
 FROM activities a
-JOIN users u ON a.user_id = u.id
-WHERE DATE(a.date) = CURRENT_DATE
+    JOIN users u ON a.user_id = u.id
+WHERE
+    DATE(a.date) = CURRENT_DATE
 ORDER BY a.date DESC;
 
+SELECT (
+        SELECT COUNT(*)
+        FROM users
+    ) as total_utilisateurs,
+    (
+        SELECT COUNT(*)
+        FROM activities
+    ) as total_activites,
+    (
+        SELECT COUNT(*)
+        FROM goals
+    ) as total_objectifs,
+    (
+        SELECT COUNT(*)
+        FROM challenges
+    ) as total_defis,
+    (
+        SELECT SUM(calories)
+        FROM activities
+    ) as calories_totales_brulées,
+    (
+        SELECT SUM(duration)
+        FROM activities
+    ) as duree_totale_minutes,
+    (
+        SELECT SUM(distance)
+        FROM activities
+    ) as distance_totale_km;
 
-SELECT 
-    (SELECT COUNT(*) FROM users) as total_utilisateurs,
-    (SELECT COUNT(*) FROM activities) as total_activites,
-    (SELECT COUNT(*) FROM goals) as total_objectifs,
-    (SELECT COUNT(*) FROM challenges) as total_defis,
-    (SELECT SUM(calories) FROM activities) as calories_totales_brulées,
-    (SELECT SUM(duration) FROM activities) as duree_totale_minutes,
-    (SELECT SUM(distance) FROM activities) as distance_totale_km;
-
-
-SELECT 
-    u.id,
-    u.email,
-    u.created_at
+SELECT u.id, u.email, u.created_at
 FROM users u
-LEFT JOIN activities a ON u.id = a.user_id
-WHERE a.id IS NULL;
+    LEFT JOIN activities a ON u.id = a.user_id
+WHERE
+    a.id IS NULL;
 
-
-SELECT 
-    TO_CHAR(date, 'Day') as jour_semaine,
+SELECT
+    TO_CHAR (date, 'Day') as jour_semaine,
     COUNT(*) as nombre_activites,
     AVG(duration) as duree_moyenne
 FROM activities
-GROUP BY TO_CHAR(date, 'Day'), EXTRACT(DOW FROM date)
-ORDER BY EXTRACT(DOW FROM date);
+GROUP BY
+    TO_CHAR (date, 'Day'),
+    EXTRACT(
+        DOW
+        FROM date
+    )
+ORDER BY EXTRACT(
+        DOW
+        FROM date
+    );
 
-
-SELECT 
-    a.*,
-    u.email as utilisateur_email
+SELECT a.*, u.email as utilisateur_email
 FROM activities a
-JOIN users u ON a.user_id = u.id
-WHERE a.id = 1;
+    JOIN users u ON a.user_id = u.id
+WHERE
+    a.id = 1;
 
+SELECT * FROM user_stats_view ORDER BY total_calories DESC;
 
-SELECT * FROM user_stats_view
-ORDER BY total_calories DESC;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP;
 
+CREATE INDEX IF NOT EXISTS idx_users_last_login ON users (last_login DESC);
