@@ -53,7 +53,7 @@ function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="logo-section">
-            <h1>🏃 Sport App</h1>
+            <h1>🏃 BasicFit2</h1>
           </div>
           {user && (
             <>
@@ -154,7 +154,7 @@ function App() {
         <footer className="app-footer">
           <div className="footer-content">
             <div className="footer-section">
-              <h3>Sport App</h3>
+              <h3>BasicFit2</h3>
               <p>Suivez vos activités sportives et atteignez vos objectifs</p>
             </div>
             <div className="footer-section">
@@ -168,7 +168,7 @@ function App() {
             </div>
             <div className="footer-section">
               <h4>Informations</h4>
-              <p>© 2024 Sport App. Tous droits réservés.</p>
+              <p>© 2024 BasicFit2. Tous droits réservés.</p>
               <p>Version 1.0.0</p>
             </div>
           </div>
