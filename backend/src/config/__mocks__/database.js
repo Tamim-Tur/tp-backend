@@ -4,16 +4,20 @@ const normalizeQuery = (query = '') =>
 const state = {
   users: [],
   activities: [],
+  goals: [],
 };
 
 let userIdSeq = 1;
 let activityIdSeq = 1;
+let goalIdSeq = 1;
 
 const resetState = () => {
   state.users.length = 0;
   state.activities.length = 0;
+  state.goals.length = 0;
   userIdSeq = 1;
   activityIdSeq = 1;
+  goalIdSeq = 1;
 };
 
 const cloneUserForReturn = (user) => {
@@ -171,7 +175,6 @@ const pgPool = {
       return { rows: [], rowCount: 1 };
     }
 
-    // Activities table
     if (normalized.startsWith('INSERT INTO ACTIVITIES')) {
       const [userId, type, duration, calories, distance, notes] = values;
       const now = new Date();
@@ -246,7 +249,6 @@ const pgPool = {
         (act) => act.user_id === Number(userId)
       );
 
-      // Aggregate stats
       if (normalized.startsWith('SELECT COUNT(*) AS TOTAL_ACTIVITIES')) {
         const totalActivities = activities.length;
         const totalDuration = activities.reduce(
@@ -307,6 +309,111 @@ const pgPool = {
 
     if (normalized.startsWith('SELECT COUNT(*) AS TOTAL_MEALS FROM MEALS')) {
       return { rows: [{ total_meals: 0, total_calories_consumed: 0 }] };
+    }
+
+    if (normalized.startsWith('INSERT INTO GOALS')) {
+      const [userId, title, description, type, targetValue, startDate, endDate] = values;
+      const now = new Date();
+      const newGoal = {
+        id: goalIdSeq++,
+        user_id: Number(userId),
+        title,
+        description,
+        type,
+        target_value: Number(targetValue),
+        current_value: 0,
+        start_date: startDate,
+        end_date: endDate,
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      };
+      state.goals.push(newGoal);
+      return { rows: [newGoal] };
+    }
+
+    if (normalized.includes('SELECT * FROM GOALS WHERE USER_ID =') && normalized.includes('AND STATUS =') && normalized.includes('ORDER BY CREATED_AT DESC')) {
+      const [userId, status] = values;
+      const filtered = (state.goals || [])
+        .filter((goal) => goal.user_id === Number(userId) && goal.status === status)
+        .slice()
+        .sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
+      return { rows: filtered };
+    }
+
+    if (normalized.startsWith('SELECT * FROM GOALS WHERE USER_ID =')) {
+      const [userId] = values;
+      const filtered = (state.goals || [])
+        .filter((goal) => goal.user_id === Number(userId))
+        .slice()
+        .sort((a, b) => b.created_at.getTime() - a.created_at.getTime());
+      return { rows: filtered };
+    }
+
+    if (normalized.startsWith('SELECT * FROM GOALS WHERE ID =')) {
+      const [id] = values;
+      const goal = state.goals.find((g) => g.id === Number(id));
+      return { rows: goal ? [goal] : [] };
+    }
+
+    if (normalized.startsWith('UPDATE GOALS')) {
+      const goalId = values[values.length - 2];
+      const userId = values[values.length - 1];
+      const goal = state.goals.find(
+        (g) => g.id === Number(goalId) && g.user_id === Number(userId)
+      );
+      if (!goal) {
+        return { rows: [] };
+      }
+
+      const setClause = normalized.split('SET')[1]?.split('WHERE')[0] || '';
+      
+      if (setClause.includes('CURRENT_VALUE =') && setClause.includes('CASE')) {
+        const currentValue = Number(values[0]);
+        goal.current_value = currentValue;
+        if (currentValue >= goal.target_value) {
+          goal.status = 'completed';
+        }
+        goal.updated_at = new Date();
+        return { rows: [{ ...goal }] };
+      }
+      
+      let valueIndex = 0;
+      if (setClause.includes('TITLE =')) {
+        goal.title = values[valueIndex++];
+      }
+      if (setClause.includes('DESCRIPTION =')) {
+        goal.description = values[valueIndex++];
+      }
+      if (setClause.includes('TARGET_VALUE =')) {
+        goal.target_value = Number(values[valueIndex++]);
+      }
+      if (setClause.includes('CURRENT_VALUE =')) {
+        goal.current_value = Number(values[valueIndex++]);
+      }
+      if (setClause.includes('START_DATE =')) {
+        goal.start_date = values[valueIndex++];
+      }
+      if (setClause.includes('END_DATE =')) {
+        goal.end_date = values[valueIndex++];
+      }
+      if (setClause.includes('STATUS =')) {
+        goal.status = values[valueIndex++];
+      }
+      
+      goal.updated_at = new Date();
+      return { rows: [{ ...goal }] };
+    }
+
+    if (normalized.startsWith('DELETE FROM GOALS WHERE ID =')) {
+      const [id, userId] = values;
+      const index = state.goals.findIndex(
+        (goal) => goal.id === Number(id) && goal.user_id === Number(userId)
+      );
+      if (index !== -1) {
+        state.goals.splice(index, 1);
+      }
+      return { rows: [], rowCount: 1 };
     }
 
     throw new Error(`Query not mocked: ${query}`);
