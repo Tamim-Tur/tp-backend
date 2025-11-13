@@ -168,7 +168,7 @@ function App() {
             </div>
             <div className="footer-section">
               <h4>Informations</h4>
-              <p>© 2024 BasicFit2. Tous droits réservés.</p>
+              <p>© 2025 BasicFit2. Tous droits réservés.</p>
               <p>Version 1.0.0</p>
             </div>
           </div>
