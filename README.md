@@ -1,7 +1,7 @@
 # 🏃 Application Sportive - Backend & Frontend
+################ Basicfit2 ######################
 
-TP SAIED Nabil - Tamim Mohamed -Reda El Hajjaji
-
+TP : SAIED Nabil -  TURKI Mohamed-Tamim  -Reda El Hajjaji
 
 ## Lancement Backend
 cd backend
@@ -14,7 +14,6 @@ cd frontend
 npm install
 npn run dev
 Le frontend sera accessible sur : **http://localhost:5173**
-
 
 Créez un fichier `.env` à la racine du dossier backend avec le contenu suivant :
 # PostgreSQL
@@ -33,17 +32,11 @@ PORT=3000
 NODE_ENV=development
 # Frontend
 FRONTEND_URL=http://localhost:5173
-
-
 ### 3. Créer un compte administrateur
-
 Exécutez le script pour créer un compte admin :
 node create-admin.js admin@example.com motdepasse123
 Remplacez `admin@example.com` et `motdepasse123` par les valeurs de votre choix.
-
-
-
-## 📚 Documentation API
+##  Documentation API
 Une fois le backend lancé, accédez à la documentation Swagger interactive :
 **http://localhost:3000/api-docs**
 Vous y trouverez :
@@ -84,8 +77,6 @@ les routes  sont disponibles  dans  swagger aussi :
 ### Vérification
 - **API** : http://localhost:3000/api
 - **Documentation Swagger** : http://localhost:3000/api-docs
-
----
 
 ## Tests
 ### Lancer les tests backend
