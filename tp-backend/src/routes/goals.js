@@ -151,19 +151,32 @@ router.get('/:id', getGoal);
  *             properties:
  *               title:
  *                 type: string
+ *                 example: "Courir 100 km ce mois"
  *               description:
  *                 type: string
+ *                 example: "Objectif de course à pied pour le mois"
+ *               type:
+ *                 type: string
+ *                 enum: [duration, distance, calories, activities_count]
+ *                 example: "distance"
  *               target_value:
  *                 type: number
+ *                 example: 100
+ *               current_value:
+ *                 type: number
+ *                 example: 45.5
  *               start_date:
  *                 type: string
  *                 format: date
+ *                 example: "2025-11-01"
  *               end_date:
  *                 type: string
  *                 format: date
+ *                 example: "2025-11-30"
  *               status:
  *                 type: string
  *                 enum: [active, completed, cancelled]
+ *                 example: "active"
  *     responses:
  *       200:
  *         description: Objectif mis à jour
