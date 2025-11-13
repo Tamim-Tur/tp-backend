@@ -5,6 +5,8 @@ TP : SAIED Nabil -  TURKI Mohamed-Tamim  -Reda El Hajjaji
 
 ## Lancement Backend
 cd backend
+npm install express cors helmet express-rate-limit bcryptjs jsonwebtoken pg mongoose joi swagger-jsdoc swagger-ui-express dotenv
+npm install -D nodemon jest supertest
 npm install
 node server.js
 Le serveur backend sera accessible sur : **http://localhost:3000**
