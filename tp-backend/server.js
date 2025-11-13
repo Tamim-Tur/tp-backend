@@ -14,10 +14,10 @@ const startServer = async () => {
     const tryListen = (port) => {
       attempts += 1;
       const server = app.listen(port, () => {
-        console.log(`\n🚀 Serveur démarré sur le port ${port}`);
-        console.log(`📚 Documentation: http://localhost:${port}/api-docs`);
-        console.log(`🌐 API: http://localhost:${port}/api`);
-        console.log(`\n✨ Application prête à recevoir des requêtes!\n`);
+        console.log(`\n Serveur démarré sur le port ${port}`);
+        console.log(` Documentation: http://localhost:${port}/api-docs`);
+        console.log(` API: http://localhost:${port}/api`);
+        console.log(`\n Application prête à recevoir des requêtes!\n`);
       });
 
       server.on('error', (err) => {
