@@ -360,7 +360,7 @@ function Goals() {
                     className="btn btn-secondary"
                     disabled={loading}
                   >
-                    🔄 Mettre à jour la progression
+                     Mettre à jour la progression
                   </button>
                 )}
                 <button
@@ -368,7 +368,7 @@ function Goals() {
                   className="btn btn-danger"
                   disabled={loading}
                 >
-                  🗑️ Supprimer
+                   Supprimer
                 </button>
               </div>
             </div>
