@@ -13,7 +13,6 @@ async function createAdmin() {
   }
 
   try {
-    // Tester la connexion à la base de données
     console.log('🔄 Test de connexion à PostgreSQL...');
     console.log(`   Host: ${process.env.PG_HOST || 'localhost'}`);
     console.log(`   Database: ${process.env.PG_DATABASE || 'sportapp'}`);
@@ -22,7 +21,6 @@ async function createAdmin() {
     await pgPool.query('SELECT NOW()');
     console.log('✅ Connexion à PostgreSQL réussie\n');
 
-    // Vérifier si l'utilisateur existe déjà
     console.log(`🔍 Vérification de l'utilisateur ${email}...`);
     const existingUser = await pgPool.query(
       'SELECT * FROM users WHERE email = $1',
@@ -30,7 +28,6 @@ async function createAdmin() {
     );
 
     if (existingUser.rows.length > 0) {
-      // Mettre à jour le rôle si l'utilisateur existe
       console.log('   Utilisateur existant trouvé, mise à jour en admin...');
       const hashedPassword = await bcrypt.hash(password, 12);
       const result = await pgPool.query(
@@ -42,7 +39,6 @@ async function createAdmin() {
       console.log(`   Email: ${result.rows[0].email}`);
       console.log(`   Rôle: ${result.rows[0].role}`);
     } else {
-      // Créer un nouvel admin
       console.log('   Création d\'un nouvel utilisateur admin...');
       const hashedPassword = await bcrypt.hash(password, 12);
       const result = await pgPool.query(

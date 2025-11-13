@@ -7,7 +7,6 @@ let attempts = 0;
 
 const startServer = async () => {
   try {
-    // Initialiser les connexions aux bases de données
     console.log('🔄 Initialisation des bases de données...');
     await initializeDatabases();
     
@@ -46,7 +45,6 @@ const startServer = async () => {
   }
 };
 
-// Gestion propre de l'arrêt
 process.on('SIGTERM', async () => {
   console.log('\n🛑 Arrêt du serveur...');
   const { pgPool } = require('./src/config/database');
