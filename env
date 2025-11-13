@@ -1,0 +1,15 @@
+PG_USER=postgres
+PG_HOST=localhost
+PG_DATABASE=sportapp
+PG_PASSWORD=1234
+PG_PORT=5432
+
+MONGO_URI=mongodb://localhost:27017/sportapp
+
+JWT_SECRET=votre_secret_jwt_tres_securise_changez_moi_123456789
+JWT_REFRESH_SECRET=votre_refresh_secret_jwt_tres_securise_changez_moi_987654321
+
+PORT=3000
+NODE_ENV=development
+
+FRONTEND_URL=http://localhost:5173
