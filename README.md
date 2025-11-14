@@ -2,7 +2,10 @@
 ################ Basicfit2 ######################
 
 TP : SAIED Nabil -  TURKI Mohamed-Tamim  -Reda El Hajjaji
-
+Il faut d’abord créer les bases de données PostgreSQL et MongoDB.
+Ensuite, dans le dossier backend, il y a un dossier sql contenant les scripts.
+Il faut exécuter ces scripts dans PostgreSQL.
+Sinon, nous avons mis des captures d’écran du projet dans le dossier captures.
 ## Lancement Backend
 cd backend
 npm install express cors helmet express-rate-limit bcryptjs jsonwebtoken pg mongoose joi swagger-jsdoc swagger-ui-express dotenv
