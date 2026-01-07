@@ -1,94 +1,36 @@
 # 🏃 Application Sportive - Backend & Frontend
 ################ Basicfit2 ######################
 
-TP : SAIED Nabil -  TURKI Mohamed-Tamim  -Reda El Hajjaji
-Il faut d’abord créer les bases de données PostgreSQL et MongoDB.
-Ensuite, dans le dossier backend, il y a un dossier sql contenant les scripts.
-Il faut exécuter ces scripts dans PostgreSQL.
-Sinon, nous avons mis des captures d’écran du projet dans le dossier captures.
-## Lancement Backend
-cd backend
-npm install express cors helmet express-rate-limit bcryptjs jsonwebtoken pg mongoose joi swagger-jsdoc swagger-ui-express dotenv
-npm install -D nodemon jest supertest
-npm install
-node server.js
-Le serveur backend sera accessible sur : **http://localhost:3000**
+**Étudiant** : SAIED Nabil
 
-## Lancement Frontend
-cd frontend
-npm install
-npn run dev
-Le frontend sera accessible sur : **http://localhost:5173**
+Ce dépôt contient la conteneurisation complète de l'application sportive Basicfit2.
 
-Créez un fichier `.env` à la racine du dossier backend avec le contenu suivant :
-# PostgreSQL
-PG_USER=postgres
-PG_HOST=localhost
-PG_DATABASE=sportapp
-PG_PASSWORD=votre_mot_de_passe_postgres
-PG_PORT=5432
-# MongoDB
-MONGO_URI=mongodb://localhost:27017/sportapp
-# JWT
-JWT_SECRET=votre_secret_jwt_tres_securise_changez_moi_123456789
-JWT_REFRESH_SECRET=votre_refresh_secret_jwt_tres_securise_changez_moi_987654321
-# Server
-PORT=3000
-NODE_ENV=development
-# Frontend
-FRONTEND_URL=http://localhost:5173
-### 3. Créer un compte administrateur
-Exécutez le script pour créer un compte admin :
-node create-admin.js admin@example.com motdepasse123
-Remplacez `admin@example.com` et `motdepasse123` par les valeurs de votre choix.
-##  Documentation API
-Une fois le backend lancé, accédez à la documentation Swagger interactive :
-**http://localhost:3000/api-docs**
-Vous y trouverez :
-- Toutes les routes disponibles
-- Les paramètres requis
-- Les exemples de requêtes
-- La possibilité de tester les endpoints directement
+## 🚀 Démarrage Rapide (Docker)
 
-### Routes principales
-- **Authentification** : `/api/auth`
-  - `POST /api/auth/register` - Inscription
-  - `POST /api/auth/login` - Connexion
-  - `POST /api/auth/refresh` - Rafraîchir le token
+L'application est entièrement conteneurisée. Pour la lancer, une seule commande suffit :
 
-- **Utilisateurs** : `/api/users`
-  - `GET /api/users` - Liste des utilisateurs (admin)
-  - `GET /api/users/:id` - Détails d'un utilisateur
-  - `PUT /api/users/:id` - Modifier un utilisateur
-  - `DELETE /api/users/:id` - Supprimer un utilisateur
+```powershell
+docker-compose up -d --build
+```
 
-- **Activités** : `/api/activities`
-  - `POST /api/activities` - Créer une activité
-  - `GET /api/activities` - Liste des activités
-  - `GET /api/activities/stats` - Statistiques
-  - `GET /api/activities/:id` - Détails d'une activité
-  - `PUT /api/activities/:id` - Modifier une activité
-  - `DELETE /api/activities/:id` - Supprimer une activité
+## 📚 Documentation
 
-- **Objectifs** : `/api/goals`
-  - `POST /api/goals` - Créer un objectif
-  - `GET /api/goals` - Liste des objectifs
-  - `GET /api/goals/:id` - Détails d'un objectif
-  - `PUT /api/goals/:id` - Modifier un objectif
-  - `DELETE /api/goals/:id` - Supprimer un objectif
-  - `POST /api/goals/:id/progress` - Mettre à jour la progression
+Une documentation détaillée est disponible dans le fichier [DOCKER_README.md](./DOCKER_README.md).
 
-les routes  sont disponibles  dans  swagger aussi :
-### Vérification
-- **API** : http://localhost:3000/api
-- **Documentation Swagger** : http://localhost:3000/api-docs
+### Accès aux services
 
-## Tests
-### Lancer les tests backend
-cd backend
-npm test
+| Service | URL |
+|---------|-----|
+| **Frontend** | http://localhost:5173 |
+| **Backend API** | http://localhost:3000/api |
+| **Swagger Docs** | http://localhost:3000/api-docs |
 
-Les tests couvrent :
-- Authentification (inscription, connexion, refresh token)
-- Gestion des utilisateurs
-- Gestion des activités
+## 🏗️ Architecture
+
+Le projet utilise 4 conteneurs Docker :
+1. **Frontend** (React + Vite + Nginx)
+2. **Backend** (Node.js + Express)
+3. **PostgreSQL** (Base de données relationnelle)
+4. **MongoDB** (Base de données NoSQL)
+
+Pour plus de détails sur l'architecture, voir [architecture-diagram.md](./architecture-diagram.md).
